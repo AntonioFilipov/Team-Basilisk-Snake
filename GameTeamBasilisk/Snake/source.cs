@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 class Snake
 {
+    //Bogomil 
+    public struct Position
+    {
+        public int row;
+        public int col;
+        public Position(int row, int col)
+        {
+            this.row = row;
+            this.col = col;
+        }
+    }
     static void Main(string[] args)
     {
 
@@ -63,6 +74,69 @@ class Snake
             }
 
         } while (cki.Key != ConsoleKey.Escape);
+
+        //Bogomil
+        Position nextPositionSnakeHead = DirectionOfMovement(currentPositionSnakeHead);
+    }
+    //Bogomil
+    public static int direction = 0;
+    public static Position DirectionOfMovement(Position currentPositionSnakeHead)
+    {
+        int rigth = 0;
+        int left = 1;
+        int down = 2;
+        int up = 3;
+
+        Position[] directions = new Position[]
+            {
+                new Position(0, 1), //right
+                new Position(0, -1), // left
+                new Position(1, 0), // down
+                new Position(-1, 0), // up
+            };
+        //int direction = rigth; //0 = right; 1 = left; 2 = down; 3 = up;
+
+        if (Console.KeyAvailable)
+        {
+            //Въведената от потребителя посока
+            ConsoleKeyInfo userInput = Console.ReadKey();
+            if (userInput.Key == ConsoleKey.RightArrow)
+            {
+                if (direction != left)
+                {
+                    direction = rigth;
+                }
+            }
+            if (userInput.Key == ConsoleKey.LeftArrow)
+            {
+                if (direction != rigth)
+                {
+                    direction = left;
+                }
+            }
+            if (userInput.Key == ConsoleKey.DownArrow)
+            {
+                if (direction != up)
+                {
+                    direction = down;
+                }
+            }
+            if (userInput.Key == ConsoleKey.UpArrow)
+            {
+                if (direction != down)
+                {
+                    direction = up;
+                }
+            }
+        }
+
+        Position nextDirection = directions[direction];
+
+        Position nextPositionSnakeHead = new Position(currentPositionSnakeHead.row + nextDirection.row,
+                currentPositionSnakeHead.col + nextDirection.col);
+
+        return nextPositionSnakeHead;
+
     }
 
     static void printScreen(char[,] screen)
@@ -195,4 +269,6 @@ class Snake
         Console.WriteLine();
         Console.WriteLine(new String('-', 40));
     }
+
+
 }
