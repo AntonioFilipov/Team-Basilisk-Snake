@@ -19,67 +19,85 @@ class Snake
             this.col = col;
         }
     }
-    static void Main(string[] args)
+
+    static void Main()
     {
 
-        char[,] screen = new char[25, 75];
+        string[,] screen = InitializeScreen();//new string[25, 80];
+        int valuesCol = screen.GetLength(1) - 2;
+        string placeHolder = "{0, -14}";
+        //Using a string matrix you can show Score, Name, Speed, Level and Time 
+        //by changing one element in the matrix to a left aligned string of the variable
+        //examples:
+        //Score:
+        screen[2, valuesCol] = String.Format(placeHolder, 50000);
+        //Name:
+        screen[5, valuesCol] = String.Format(placeHolder, "Pesho");
+        //Speed:
+        screen[8, valuesCol] = String.Format(placeHolder, 7);
+        //Level:
+        screen[11, valuesCol] = String.Format(placeHolder, "Medium");
+        //Time:
+        screen[14, valuesCol] = String.Format(placeHolder, 360);
+        //StringBuilder can also be used to build proper 14 charcter strings 
+        //that are placed in the second to last col and correct row
 
-        int[] headPos = { 10, 40 };
+        Position head = new Position(0,0);
 
-        for (int row = 0; row < screen.GetLength(0); row++)
-        {
-            for (int col = 0; col < screen.GetLength(1); col++)
-            {
-                screen[row, col] = '.';
-            }
-        }
+        //for (int row = 0; row < screen.GetLength(0); row++)
+        //{
+        //    for (int col = 0; col < screen.GetLength(1); col++)
+        //    {
+        //        screen[row, col] = ".";
+        //    }
+        //}
 
         printScreen(screen);
 
+        //ConsoleKeyInfo cki;
+        //Console.TreatControlCAsInput = true;
+        //Console.Clear();
+        //PrintWelcomeScreen();
 
-        ConsoleKeyInfo cki;
-        Console.TreatControlCAsInput = true;
-        Console.Clear();
-        PrintWelcomeScreen();
+        //do
+        //{
+        //    cki = Console.ReadKey();
 
-        do
-        {
-            cki = Console.ReadKey();
+        //    if (cki.KeyChar == 'h')
+        //    {
+        //        Console.Clear();
+        //        PrintHighScores();
+        //    }
+        //    else if (cki.KeyChar == 'n')
+        //    {
+        //        Console.Clear();
+        //        StartNewGame();
+        //    }
+        //    else if (cki.KeyChar == 'e')
+        //    {
+        //        Console.Clear();
+        //        PrintTankYouForPlayingScreen();
+        //        break;
+        //    }
+        //    else if (cki.KeyChar == 'c')
+        //    {
+        //        Console.Clear();
+        //        PrintWelcomeScreen();
+        //    }
+        //    else if (cki.KeyChar == 'p')
+        //    {
+        //        Console.Clear();
+        //        PauseGame();
+        //    }
 
-            if (cki.KeyChar == 'h')
-            {
-                Console.Clear();
-                PrintHighScores();
-            }
-            else if (cki.KeyChar == 'n')
-            {
-                Console.Clear();
-                StartNewGame();
-            }
-            else if (cki.KeyChar == 'e')
-            {
-                Console.Clear();
-                PrintTankYouForPlayingScreen();
-                break;
-            }
-            else if (cki.KeyChar == 'c')
-            {
-                Console.Clear();
-                PrintWelcomeScreen();
-            }
-            else if (cki.KeyChar == 'p')
-            {
-                Console.Clear();
-                PauseGame();
-            }
-
-        } while (cki.Key != ConsoleKey.Escape);
+        //} while (cki.Key != ConsoleKey.Escape);
 
         //Bogomil
-        Position nextPositionSnakeHead = DirectionOfMovement(currentPositionSnakeHead);
+        //Position nextPositionSnakeHead = DirectionOfMovement(head);
     }
     //Bogomil
     public static int direction = 0;
+
     public static Position DirectionOfMovement(Position currentPositionSnakeHead)
     {
         int rigth = 0;
@@ -139,15 +157,104 @@ class Snake
 
     }
 
-    static void printScreen(char[,] screen)
+    static string[,] InitializeScreen()
     {
+        //ScoreRow = 2;
+        //NameRow = 5;
+        //SpedRow = 8;
+        //LevelRow = 11;
+        //TimeRow = 14;
+        string[,] screen = new string[25, 67];
+
+        int totalRows = screen.GetLength(0);
+        int totalCols = screen.GetLength(1);
+
+        for (int row = 0; row < totalRows; row++)
+        {
+            for (int col = 0; col < totalCols; col++)
+            {
+                if (col == 0 || col == totalCols - 1 || col == totalCols - 3)
+                {
+                    screen[row, col] = "|";
+                }
+                else if ((row == 0 || row == totalRows - 1) && (col > 0 && col <  totalCols - 3))
+                {
+                    screen[row, col] = "-";
+                }
+                else if (col == totalCols - 2)
+                {
+                    if (row == 0)
+                    {
+                        screen[row, col] = "-----INFO-----";
+                    }
+                    else if (row == 1) //2
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Score:");
+                    }
+                    else if (row == 4)//5
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Name:");
+                    }
+                    else if (row == 7)//8
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Speed:");
+                    }
+                    else if (row == 10)//11
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Level:");
+                    }
+                    else if (row == 13)//14
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Time:");
+                    }
+                    else if (row == 16)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "Options:");
+                    }
+                    else if (row == 17)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "1: Pause Game.");
+                    }
+                    else if (row == 18)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "2: Start Game.");
+                    }
+                    else if (row == 19)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "3: Exit Game.");
+                    }
+                    else if (row == totalRows - 1)
+                    {
+                        screen[row, col] = "--------------";
+                    }
+                    else
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "");
+                    }
+                }
+                else
+                {
+                    screen[row, col] = ".";
+                }
+            }   
+        }
+
+        return screen;
+    }
+
+    static void printScreen(string[,] screen)
+    {
+        bool notMax = screen.GetLength(1) < 67;
         for (int row = 0; row < screen.GetLength(0); row++)
         {
             for (int col = 0; col < screen.GetLength(1); col++)
             {
                 Console.Write(screen[row, col]);
             }
-            Console.WriteLine();
+            if (notMax)
+            {
+                Console.WriteLine();
+            }
         }
     }
 
@@ -199,6 +306,7 @@ class Snake
         Console.WriteLine();
         Console.WriteLine(new String('-', 44));
     }
+
     private static void AddCurrentUserScore(string input, int score)
     {
         string userName = input.Trim();
@@ -269,6 +377,4 @@ class Snake
         Console.WriteLine();
         Console.WriteLine(new String('-', 40));
     }
-
-
 }
