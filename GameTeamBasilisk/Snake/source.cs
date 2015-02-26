@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Media;
+using WMPLib;
 
 class Snake
 {
@@ -22,7 +25,6 @@ class Snake
 
     static void Main()
     {
-
         string[,] screen = InitializeScreen();//new string[25, 80];
         int valuesCol = screen.GetLength(1) - 2;
         string placeHolder = "{0, -14}";
@@ -42,18 +44,57 @@ class Snake
         //StringBuilder can also be used to build proper 14 charcter strings 
         //that are placed in the second to last col and correct row
 
-        Position head = new Position(0,0);
+        Position head = new Position(15,30);
 
-        //for (int row = 0; row < screen.GetLength(0); row++)
+        string face = ((char)1).ToString();
+
+        screen[head.row, head.col] = face;
+
+        //printScreen(screen);
+
+        //music will be used for background music while in a menu or in game.
+        //sound will be used for playing short sounds when things happen in the game (power ups, eating stuff, hitting a wall)
+        //music and sound are seperated so they can played at the same time and can have diferent volume levels
+        //wmp.URL can't use paths like "..\..\Sounds\inMenu.wav" they need to be "inGame.wav"
+        //sounds are played in the background until the sound finishes so the program won't have to wait for them to finish
+        //a file can't be looped so a timer my need to be implemented to play the sound again after the file is over
+        WindowsMediaPlayer music = new WindowsMediaPlayer();
+        WindowsMediaPlayer sound = new WindowsMediaPlayer();
+
+        //This example playes "inGame.wav", waits 10 secs, then starts playing "powerUp.wav" every 5 seconds
+        //music.URL = "inGame.wav";
+        //music.settings.volume = 40;
+        //music.controls.play();
+
+        //Thread.Sleep(10000);
+
+        //sound.URL = "powerUp.wav";
+        //while (true)
         //{
-        //    for (int col = 0; col < screen.GetLength(1); col++)
-        //    {
-        //        screen[row, col] = ".";
-        //    }
+        //    sound.controls.play();
+        //    Thread.Sleep(5000);
         //}
 
-        printScreen(screen);
+        int i = 0;
+        Position next = DirectionOfMovement(head);
+        while (true)
+        {
+            next = DirectionOfMovement(next);
+            //Console.WriteLine("Row: {0}  col: {1}", head.row, head.col);
+            screen = InitializeScreen();
+            screen[next.row, next.col] = face;
+            Thread.Sleep(700);
+            Console.Clear();
+            printScreen(screen);
+            i++;
+        }
 
+        //var result = new Dictionary<string, int>();
+
+        //result["adasdas"] = 23213123;
+        //result["fafdasd"] = 123123;
+        //SaveHighScore(result);
+        
         //ConsoleKeyInfo cki;
         //Console.TreatControlCAsInput = true;
         //Console.Clear();
@@ -106,18 +147,19 @@ class Snake
         int up = 3;
 
         Position[] directions = new Position[]
-            {
+        {
                 new Position(0, 1), //right
                 new Position(0, -1), // left
                 new Position(1, 0), // down
                 new Position(-1, 0), // up
-            };
+        };
         //int direction = rigth; //0 = right; 1 = left; 2 = down; 3 = up;
 
         if (Console.KeyAvailable)
         {
             //Въведената от потребителя посока
-            ConsoleKeyInfo userInput = Console.ReadKey();
+            ConsoleKeyInfo userInput = CorrectKey();// Console.ReadKey();
+
             if (userInput.Key == ConsoleKey.RightArrow)
             {
                 if (direction != left)
@@ -125,21 +167,21 @@ class Snake
                     direction = rigth;
                 }
             }
-            if (userInput.Key == ConsoleKey.LeftArrow)
+            else if (userInput.Key == ConsoleKey.LeftArrow)
             {
                 if (direction != rigth)
                 {
                     direction = left;
                 }
             }
-            if (userInput.Key == ConsoleKey.DownArrow)
+            else if (userInput.Key == ConsoleKey.DownArrow)
             {
                 if (direction != up)
                 {
                     direction = down;
                 }
             }
-            if (userInput.Key == ConsoleKey.UpArrow)
+            else if (userInput.Key == ConsoleKey.UpArrow)
             {
                 if (direction != down)
                 {
@@ -155,6 +197,23 @@ class Snake
 
         return nextPositionSnakeHead;
 
+    }
+
+    static ConsoleKeyInfo CorrectKey()
+    {
+        ConsoleKeyInfo correctKey = new ConsoleKeyInfo();
+
+        while (true)
+        {
+            correctKey = Console.ReadKey();
+            if (correctKey.Key.ToString() == "LeftArrow" || correctKey.Key.ToString() == "RightArrow" ||
+                correctKey.Key.ToString() == "UpArrow" || correctKey.Key.ToString() == "DownArrow")
+            {
+                break;
+            }
+        }
+
+        return correctKey;
     }
 
     static string[,] InitializeScreen()
@@ -213,15 +272,23 @@ class Snake
                     }
                     else if (row == 17)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "1: Pause Game.");
+                        screen[row, col] = String.Format("{0, -14}", "1: Pause Game");
                     }
                     else if (row == 18)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "2: Start Game.");
+                        screen[row, col] = String.Format("{0, -14}", "2: Start Game");
                     }
                     else if (row == 19)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "3: Exit Game.");
+                        screen[row, col] = String.Format("{0, -14}", "3: Mute Music");
+                    }
+                    else if (row == 20)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "4: Mute Sounds");
+                    }
+                    else if (row == 21)
+                    {
+                        screen[row, col] = String.Format("{0, -14}", "5: Exit Game");
                     }
                     else if (row == totalRows - 1)
                     {
@@ -234,7 +301,7 @@ class Snake
                 }
                 else
                 {
-                    screen[row, col] = ".";
+                    screen[row, col] = " ";
                 }
             }   
         }
@@ -244,18 +311,32 @@ class Snake
 
     static void printScreen(string[,] screen)
     {
-        bool notMax = screen.GetLength(1) < 67;
+        //bool notMax = screen.GetLength(1) < 67;
+        //for (int row = 0; row < screen.GetLength(0); row++)
+        //{
+        //    for (int col = 0; col < screen.GetLength(1); col++)
+        //    {
+        //        Console.Write(screen[row, col]);
+        //    }
+        //    if (notMax)
+        //    {
+        //        Console.WriteLine();
+        //    }
+        //}
+
+        StringBuilder result = new StringBuilder();
+
         for (int row = 0; row < screen.GetLength(0); row++)
         {
             for (int col = 0; col < screen.GetLength(1); col++)
             {
-                Console.Write(screen[row, col]);
+                //Console.Write(screen[row, col]);
+                result.Append(screen[row,col]);
             }
-            if (notMax)
-            {
-                Console.WriteLine();
-            }
+           // result.Append('\n');
         }
+
+        Console.Write(result);
     }
 
     private static void PauseGame()
