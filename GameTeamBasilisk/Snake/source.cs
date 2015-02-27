@@ -80,7 +80,17 @@ class Snake
 
         string face = ((char)1).ToString();
 
-        screen[head.row, head.col] = face;
+        var body = new List<Position>();
+        for (int i = 0; i < 5; i++)
+        {
+            body.Add(new Position(0, 2 + i));
+        }
+        //foreach (Position point in body)
+        //{
+        //    screen[point.row, point.col] = "*";
+        //}
+
+        //screen[head.row, head.col] = face;
         //int i = 0;
         Position next = DirectionOfMovement(head);
 
@@ -100,7 +110,15 @@ class Snake
             {
                 break;
             }
-            screen[next.row, next.col] = face;
+            //screen[next.row, next.col] = face;
+
+            body.RemoveAt(body.Count - 1);
+            Position nextBodyPosition = body[0];
+            
+            foreach (Position point in body)
+                screen[point.row, point.col] = "*";
+
+            body.Insert(0, next);
 
             Thread.Sleep(100);
             Console.Clear();
