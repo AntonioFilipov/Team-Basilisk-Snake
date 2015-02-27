@@ -12,6 +12,7 @@ using WMPLib;
 class Snake
 {
     //Bogomil 
+    #region Position
     public struct Position
     {
         public int row;
@@ -22,10 +23,15 @@ class Snake
             this.col = col;
         }
     }
-
+    #endregion
+    static string obstacleSymbol = "@";
     static void Main()
     {
-        string[,] screen = InitializeScreen();//new string[25, 80];
+        Console.SetWindowSize(80, 25);
+        Console.SetBufferSize(80, 25);
+
+        Position obstaclePosition = Obstacles();
+        string[,] screen = InitializeScreen(obstaclePosition);//new string[25, 80];
         int valuesCol = screen.GetLength(1) - 2;
         string placeHolder = "{0, -14}";
         //Using a string matrix you can show Score, Name, Speed, Level and Time 
@@ -44,11 +50,7 @@ class Snake
         //StringBuilder can also be used to build proper 14 charcter strings 
         //that are placed in the second to last col and correct row
 
-        Position head = new Position(15,30);
 
-        string face = ((char)1).ToString();
-
-        screen[head.row, head.col] = face;
 
         //printScreen(screen);
 
@@ -74,19 +76,37 @@ class Snake
         //    sound.controls.play();
         //    Thread.Sleep(5000);
         //}
+        Position head = new Position(1, 1);
 
-        int i = 0;
+        string face = ((char)1).ToString();
+
+        screen[head.row, head.col] = face;
+        //int i = 0;
         Position next = DirectionOfMovement(head);
+
         while (true)
         {
-            next = DirectionOfMovement(next);
             //Console.WriteLine("Row: {0}  col: {1}", head.row, head.col);
-            screen = InitializeScreen();
+            bool isObstEaten = IsObstacleEaten(next, obstaclePosition);
+
+            if (isObstEaten)
+            {
+                //screen = InitializeScreen(obstaclePosition, isObstEaten);
+                obstaclePosition = Obstacles();                       
+            }
+
+            screen = InitializeScreen(obstaclePosition);
+            if (next.row > 24 || next.row < 1 || next.col > 63 || next.col < 1)
+            {
+                break;
+            }
             screen[next.row, next.col] = face;
-            Thread.Sleep(700);
+
+            Thread.Sleep(100);
             Console.Clear();
-            printScreen(screen);
-            i++;
+
+            printScreen(MultiArrayToArray(screen));
+            next = DirectionOfMovement(next);
         }
 
         //var result = new Dictionary<string, int>();
@@ -94,7 +114,7 @@ class Snake
         //result["adasdas"] = 23213123;
         //result["fafdasd"] = 123123;
         //SaveHighScore(result);
-        
+
         //ConsoleKeyInfo cki;
         //Console.TreatControlCAsInput = true;
         //Console.Clear();
@@ -137,6 +157,7 @@ class Snake
         //Position nextPositionSnakeHead = DirectionOfMovement(head);
     }
     //Bogomil
+
     public static int direction = 0;
 
     public static Position DirectionOfMovement(Position currentPositionSnakeHead)
@@ -216,7 +237,7 @@ class Snake
         return correctKey;
     }
 
-    static string[,] InitializeScreen()
+    static string[,] InitializeScreen(Position obstacle)
     {
         //ScoreRow = 2;
         //NameRow = 5;
@@ -236,7 +257,7 @@ class Snake
                 {
                     screen[row, col] = "|";
                 }
-                else if ((row == 0 || row == totalRows - 1) && (col > 0 && col <  totalCols - 3))
+                else if ((row == 0 || row == totalRows - 1) && (col > 0 && col < totalCols - 3))
                 {
                     screen[row, col] = "-";
                 }
@@ -303,13 +324,30 @@ class Snake
                 {
                     screen[row, col] = " ";
                 }
-            }   
-        }
+            }
+        } 
+
+        screen[obstacle.row, obstacle.col] = obstacleSymbol;
 
         return screen;
     }
 
-    static void printScreen(string[,] screen)
+    static StringBuilder MultiArrayToArray(string[,] screen)
+    {
+        StringBuilder result = new StringBuilder();
+        for (int row = 0; row < screen.GetLength(0); row++)
+        {
+            for (int col = 0; col < screen.GetLength(1); col++)
+            {
+                //Console.Write(screen[row, col]);
+                result.Append(screen[row, col]);
+            }
+            // result.Append('\n');
+        }
+        return result;
+    }
+
+    static void printScreen(StringBuilder str)
     {
         //bool notMax = screen.GetLength(1) < 67;
         //for (int row = 0; row < screen.GetLength(0); row++)
@@ -324,19 +362,19 @@ class Snake
         //    }
         //}
 
-        StringBuilder result = new StringBuilder();
+        //StringBuilder result = new StringBuilder();
 
-        for (int row = 0; row < screen.GetLength(0); row++)
-        {
-            for (int col = 0; col < screen.GetLength(1); col++)
-            {
-                //Console.Write(screen[row, col]);
-                result.Append(screen[row,col]);
-            }
-           // result.Append('\n');
-        }
+        //for (int row = 0; row < screen.GetLength(0); row++)
+        //{
+        //    for (int col = 0; col < screen.GetLength(1); col++)
+        //    {
+        //        //Console.Write(screen[row, col]);
+        //        result.Append(screen[row,col]);
+        //    }
+        //   // result.Append('\n');
+        //}
 
-        Console.Write(result);
+        Console.Write(str);
     }
 
     private static void PauseGame()
@@ -458,4 +496,27 @@ class Snake
         Console.WriteLine();
         Console.WriteLine(new String('-', 40));
     }
+
+    public static Position Obstacles()
+    {
+        Random rnd = new Random();
+        Position obstacle = new Position(rnd.Next(1, 24), rnd.Next(1, 64));
+        //Position obstacle = new Position(10, 10);
+        return obstacle;
+    }
+
+    public static bool IsObstacleEaten(Position nextSnakeHead, Position obstacle)
+    {
+        bool isEaten = false;
+        nextSnakeHead = DirectionOfMovement(nextSnakeHead);
+        if (nextSnakeHead.row == obstacle.row && nextSnakeHead.col == obstacle.col)
+        {
+            isEaten = true;
+        }
+        //Console.WriteLine("{0} {1}", nextSnakeHead.row, obstacle.row);
+        return isEaten;
+    }
+
+    
+
 }
