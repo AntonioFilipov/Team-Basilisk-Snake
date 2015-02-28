@@ -31,7 +31,12 @@ class Snake
         Console.SetBufferSize(80, 25);
 
         Position obstaclePosition = Obstacles();
-        string[,] screen = InitializeScreen(obstaclePosition);//new string[25, 80];
+        var bomb = new Dictionary<int, List<int>>();
+        //bomb.Add(obstaclePosition.row, new List<int>());
+        //bomb[obstaclePosition.row].Add(obstaclePosition.col);
+
+        bool isObstEat = false;
+        string[,] screen = InitializeScreen(obstaclePosition, isObstEat, bomb);//new string[25, 80];
         int valuesCol = screen.GetLength(1) - 2;
         string placeHolder = "{0, -14}";
         //Using a string matrix you can show Score, Name, Speed, Level and Time 
@@ -92,24 +97,42 @@ class Snake
 
         //screen[head.row, head.col] = face;
         //int i = 0;
-        Position next = DirectionOfMovement(head);
+       // Position next = DirectionOfMovement(head);
+        Position currentPosition = head;
+        Position next = head;
 
         while (true)
         {
-            //Console.WriteLine("Row: {0}  col: {1}", head.row, head.col);
-            bool isObstEaten = IsObstacleEaten(next, obstaclePosition);
+            //Console.WriteLine("Row: {0}  col: {1}", head.row, head.col);           
 
+            bool isObstEaten = IsObstacleEaten(currentPosition, obstaclePosition);
             if (isObstEaten)
             {
-                //screen = InitializeScreen(obstaclePosition, isObstEaten);
-                obstaclePosition = Obstacles();                       
+                
+                if (bomb.ContainsKey(obstaclePosition.row))
+                {
+                    bomb[obstaclePosition.row].Add(obstaclePosition.col);
+                }
+                else
+                {
+                    bomb.Add(obstaclePosition.row, new List<int>());
+                    bomb[obstaclePosition.row].Add(obstaclePosition.col);
+                }
+
+                obstaclePosition = Obstacles();
+                
             }
 
-            screen = InitializeScreen(obstaclePosition);
-            if (next.row > 24 || next.row < 1 || next.col > 63 || next.col < 1)
+
+
+            screen = InitializeScreen(obstaclePosition, isObstEaten, bomb);
+            if (currentPosition.row > 24 || currentPosition.row < 1 || currentPosition.col > 63 || currentPosition.col < 1)
             {
                 break;
             }
+//<<<<<<< HEAD
+            screen[currentPosition.row, currentPosition.col] = face;
+//=======
             //screen[next.row, next.col] = face;
 
             body.RemoveAt(body.Count - 1);
@@ -119,12 +142,23 @@ class Snake
                 screen[point.row, point.col] = "*";
 
             body.Insert(0, next);
+//>>>>>>> origin/master
 
-            Thread.Sleep(100);
+            Thread.Sleep(150);
             Console.Clear();
 
             printScreen(MultiArrayToArray(screen));
-            next = DirectionOfMovement(next);
+            next = DirectionOfMovement(currentPosition);
+            currentPosition = next;
+
+            bool isBombEat = bombEat(next, bomb);
+            if (isBombEat)
+            {
+                break;
+            }
+
+
+            
         }
 
         //var result = new Dictionary<string, int>();
@@ -184,7 +218,7 @@ class Snake
         int left = 1;
         int down = 2;
         int up = 3;
-
+       
         Position[] directions = new Position[]
         {
                 new Position(0, 1), //right
@@ -255,7 +289,7 @@ class Snake
         return correctKey;
     }
 
-    static string[,] InitializeScreen(Position obstacle)
+    static string[,] InitializeScreen(Position obstacle, bool isObstEaten, Dictionary<int, List<int>> bomb)
     {
         //ScoreRow = 2;
         //NameRow = 5;
@@ -271,7 +305,11 @@ class Snake
         {
             for (int col = 0; col < totalCols; col++)
             {
-                if (col == 0 || col == totalCols - 1 || col == totalCols - 3)
+                if (bomb.ContainsKey(row) && bomb[row].Contains(col))
+                {
+                    screen[row, col] = "*";
+                }
+                else if (col == 0 || col == totalCols - 1 || col == totalCols - 3)
                 {
                     screen[row, col] = "|";
                 }
@@ -343,7 +381,7 @@ class Snake
                     screen[row, col] = " ";
                 }
             }
-        } 
+        }
 
         screen[obstacle.row, obstacle.col] = obstacleSymbol;
 
@@ -515,24 +553,58 @@ class Snake
         Console.WriteLine(new String('-', 40));
     }
 
+    private static readonly Random rnd = new Random();
+    private static readonly object syncLock = new object();
     public static Position Obstacles()
     {
-        Random rnd = new Random();
-        Position obstacle = new Position(rnd.Next(1, 24), rnd.Next(1, 64));
+        //Random rnd = new Random();
+        List<int> randomNumbersRow = new List<int>();
+        List<int> randomNumbersCol = new List<int>();
+        int row = 1;
+        int col = 1;
+
+        lock (syncLock)
+        {
+            do
+            {
+                row = rnd.Next(1, 24);
+            }
+            while (randomNumbersRow.Contains(row));
+
+            do
+            {
+                col = rnd.Next(1, 64);
+            }
+            while (randomNumbersCol.Contains(col));
+
+            Position obstacle = new Position(row, col);
+            return obstacle;
+        }
         //Position obstacle = new Position(10, 10);
-        return obstacle;
+       
     }
 
-    public static bool IsObstacleEaten(Position nextSnakeHead, Position obstacle)
+    public static bool IsObstacleEaten(Position currentPosition, Position obstacle)
     {
         bool isEaten = false;
-        nextSnakeHead = DirectionOfMovement(nextSnakeHead);
-        if (nextSnakeHead.row == obstacle.row && nextSnakeHead.col == obstacle.col)
+        //nextSnakeHead = DirectionOfMovement(nextSnakeHead);
+        if (currentPosition.row == obstacle.row && currentPosition.col == obstacle.col)
         {
             isEaten = true;
         }
         //Console.WriteLine("{0} {1}", nextSnakeHead.row, obstacle.row);
         return isEaten;
+    }
+
+    public static bool bombEat(Position nextPosition, Dictionary<int, List<int>> bombPositions)
+    {
+        bool isBombEat = false;
+        if (bombPositions.ContainsKey(nextPosition.row) && bombPositions[nextPosition.row].Contains(nextPosition.col))
+        {
+            isBombEat = true;
+        }
+
+        return isBombEat;
     }
 
     
