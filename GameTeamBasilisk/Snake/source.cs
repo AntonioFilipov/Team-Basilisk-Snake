@@ -24,199 +24,106 @@ class Snake
         }
     }
     #endregion
-    static string foodSymbol = '♣'.ToString();//"@";
+    static string foodSymbol = '■'.ToString();//"@";
     static void Main()
     {
         Console.SetWindowSize(85, 26);
         Console.SetBufferSize(85, 26);
         Console.CursorVisible = false;
 
-        MainMenu();
-        PlayGame(2, "Much game");
+        //Console.Clear();
+        //PrintHighScores();
+        //Thread.Sleep(9999999);
 
-        //string[,] screen;
+        int result;
+        while (true)
+        {
+            result = MainMenu();
+            if (result == 1)
+            {
+                direction = 3;
+                PlayGame(InputName(), SpeedSelect(), LevelSelect());
+            }
+            else if (result == 2)
+            {
+                HighScores();
+            }
+        }
+    }
+
+    //--------------Game
+    static Dictionary<string, int> PlayGame(string name = "Player", string speed = "Medium", string level = "Medium")
+    {
         //var bomb = new Dictionary<int, List<int>>();
         //bomb.Add(foodPosition.row, new List<int>());
         //bomb[obstaclePosition.row].Add(obstaclePosition.col);
 
-        //string[,] screen = InitializeScreen(foodPosition,  bomb);//new string[25, 80];
-        //int valuesCol = screen.GetLength(1) - 2;
-        //string placeHolder = "{0, -14}";
-        ////Using a string matrix you can show Score, Name, Speed, Level and Time 
-        ////by changing one element in the matrix to a left aligned string of the variable
-        ////examples:
-        ////Score:
-        //screen[2, valuesCol] = String.Format(placeHolder, 50000);
-        ////Name:
-        //screen[5, valuesCol] = String.Format(placeHolder, "Pesho");
-        ////Speed:
-        //screen[8, valuesCol] = String.Format(placeHolder, 7);
-        ////Level:
-        //screen[11, valuesCol] = String.Format(placeHolder, "Medium");
-        ////Time:
-        //screen[14, valuesCol] = String.Format(placeHolder, 360);
-        //StringBuilder can also be used to build proper 14 charcter strings 
-        //that are placed in the second to last col and correct row
-
-
-
-        //printScreen(screen);
-
-        //music will be used for background music while in a menu or in game.
-        //sound will be used for playing short sounds when things happen in the game (power ups, eating stuff, hitting a wall)
-        //music and sound are seperated so they can played at the same time and can have diferent volume levels
-        //wmp.URL can't use paths like "..\..\Sounds\inMenu.wav" they need to be "inGame.wav"
-        //sounds are played in the background until the sound finishes so the program won't have to wait for them to finish
-        //a file can't be looped so a timer my need to be implemented to play the sound again after the file is over
-        //WindowsMediaPlayer music = new WindowsMediaPlayer();
-        //WindowsMediaPlayer sound = new WindowsMediaPlayer();
-
-        //This example playes "inGame.wav", waits 10 secs, then starts playing "powerUp.wav" every 5 seconds
-        //music.URL = "inGame.wav";
-        //music.settings.volume = 40;
-        //music.controls.play();
-
-        //Thread.Sleep(10000);
-
-        //sound.URL = "powerUp.wav";
-        //while (true)
-        //{
-        //    sound.controls.play();
-        //    Thread.Sleep(5000);
-        //}
-        //Position head = new Position(1, 1);
-
-        //string face = ((char)1).ToString();
-        //string bodyChar = ((char)4).ToString();
-
-        
-        //Position headPos = new Position(22, 31);
-        //Position pastPos = new Position(23, 31);
-        //var body = new Queue<Position>();
-        //body.Enqueue(pastPos);
-        //Position foodPosition = Food();
-        //bool eatSelf;
-        //bool hitWall;
-
-        //while (true)
-        //{                
-        //    if (IsFoodEaten(headPos, foodPosition))
-        //    {
-                
-        //        //if (bomb.ContainsKey(obstaclePosition.row))
-        //        //{
-        //        //    bomb[obstaclePosition.row].Add(obstaclePosition.col);
-        //        //}
-        //        //else
-        //        //{
-        //        //    bomb.Add(obstaclePosition.row, new List<int>());
-        //        //    bomb[obstaclePosition.row].Add(obstaclePosition.col);
-        //        //}
-
-        //        foodPosition = Food();
-        //        body.Enqueue(pastPos);             
-        //    }
-
-        //    screen = InitializeScreen(foodPosition);
-
-        //    body.Enqueue(pastPos);
-        //    body.Dequeue();
-            
-        //    foreach (Position point in body)
-        //    {
-        //        screen[point.row, point.col] = bodyChar;
-        //    }
-        //    screen[headPos.row, headPos.col] = face;
-
-        //    Thread.Sleep(150);
-        //    Console.Clear();
-        //    printScreen(screen);
-
-        //    eatSelf = body.Contains(headPos);
-        //    hitWall = headPos.row > 23 || headPos.row < 1 || headPos.col > 68 || headPos.col < 1;
-        //    if (hitWall || eatSelf)
-        //    {
-        //        break;
-        //    }
-
-        //    //Thread.Sleep(99999);
-        //    pastPos = headPos;
-        //    headPos = DirectionOfMovement(headPos);
-
-        //    //bool isBombEat = bombEat(next, bomb);
-        //    //if (isBombEat)
-        //    //{
-        //    //    break;
-        //    //}
-        //}
-
-        //var result = new Dictionary<string, int>();
-
-        //result["adasdas"] = 23213123;
-        //result["fafdasd"] = 123123;
-        //SaveHighScore(result);
-
-        //ConsoleKeyInfo cki;
-        //Console.TreatControlCAsInput = true;
-        //Console.Clear();
-        //PrintWelcomeScreen();
-
-        //do
-        //{
-        //    cki = Console.ReadKey();
-
-        //    if (cki.KeyChar == 'h')
-        //    {
-        //        Console.Clear();
-        //        PrintHighScores();
-        //    }
-        //    else if (cki.KeyChar == 'n')
-        //    {
-        //        Console.Clear();
-        //        StartNewGame();
-        //    }
-        //    else if (cki.KeyChar == 'e')
-        //    {
-        //        Console.Clear();
-        //        PrintTankYouForPlayingScreen();
-        //        break;
-        //    }
-        //    else if (cki.KeyChar == 'c')
-        //    {
-        //        Console.Clear();
-        //        PrintWelcomeScreen();
-        //    }
-        //    else if (cki.KeyChar == 'p')
-        //    {
-        //        Console.Clear();
-        //        PauseGame();
-        //    }
-
-        //} while (cki.Key != ConsoleKey.Escape);
-
-        //Bogomil
-        //Position nextPositionSnakeHead = DirectionOfMovement(head);
-    }
-
-    //--------------Game
-    static Dictionary<string, int> PlayGame(int speed, string level)
-    {
         WindowsMediaPlayer music = new WindowsMediaPlayer();
         WindowsMediaPlayer sound = new WindowsMediaPlayer();
-        string face = ((char)1).ToString();
-        string bodyChar = ((char)4).ToString();
+        string face = "☺";//((char)1).ToString();
+        string bodyChar = "♦";//((char)4).ToString();
+        string obstacleChar = "¤";
+        
+        string[,] screen = InitializeScreen(new  Position(12, 30));
+        List<Position> obstacles = GenerateObstacles(level);
 
-        string[,] screen;
-        Position headPos = new Position(22, 31);
-        Position pastPos = new Position(23, 31);
+        int score = 0;
+        DateTime startTime = DateTime.Now;
+        TimeSpan time = new TimeSpan(); 
+        string placeHolder = "{0, -14}";
+        string timeHolder = "{0}:{1}:{2}";
+        int valuesCol = screen.GetLength(1) - 2;
+        Position scorePos = new Position(2, valuesCol);
+        Position timePos = new Position(14, valuesCol);
+        name = String.Format(placeHolder, name);
+        int speedTime = 0;
+        switch (speed)
+        {
+            case "Slow":
+                speedTime = 220;
+                break;
+            case "Medium":
+                speedTime = 150;
+                break;
+            case "Fast":
+                speedTime = 80;
+                break;
+            default:
+                break;
+        }
+        speed = String.Format(placeHolder, speed);
+        level = String.Format(placeHolder, level);
+
+        Position headPos = new Position(22, 1);
+        Position pastPos = new Position(23, 1);
         var body = new Queue<Position>();
         body.Enqueue(pastPos);
-        Position foodPosition = Food();
+
+        DateTime timeClubs = new DateTime();
+        DateTime timeHearts = new DateTime();
+        DateTime timeSpades = new DateTime();
+        var foodPositions = new List<Position>();
+        Position foodPosition = Food(headPos, body, foodPositions, obstacles);
+        Position posClubs = new Position();
+        Position posHearts = new Position();
+        Position posSpades = new Position();
         bool eatSelf;
         bool hitWall;
+        bool hitObstacle;
+        bool foodOfClubs = false;
+        bool foodOfHearts = false;
+        bool foodOfSpades = false;
+        int rndResult = 0;
 
+        TimeSpan loop = new TimeSpan(0,1,37);
+        music.URL = "inGame.wav";
+        music.settings.volume = 40;
+        sound.settings.volume = 85;
+        music.controls.play();
         while (true)
         {
+            foodPositions = new List<Position>() { foodPosition, posClubs, posHearts, posSpades };
+            //Thread.Sleep(999999);
             if (IsFoodEaten(headPos, foodPosition))
             {
 
@@ -230,8 +137,59 @@ class Snake
                 //    bomb[obstaclePosition.row].Add(obstaclePosition.col);
                 //}
 
-                foodPosition = Food();
+                sound.URL = "eat.wav";
+                sound.controls.play();
+                foodPosition = Food(headPos, body, foodPositions, obstacles);
                 body.Enqueue(pastPos);
+                score += 5;
+
+                rndResult = rnd.Next(1, 3);
+                if (rndResult == 1 && !foodOfClubs)
+                {
+                    timeClubs = DateTime.Now;
+                    posClubs = Food(headPos, body, foodPositions, obstacles);
+                    foodOfClubs = true;
+                }
+
+                rndResult = rnd.Next(1, 4);
+                if (rndResult == 1 && !foodOfHearts)
+                {
+                    timeHearts = DateTime.Now;
+                    posHearts = Food(headPos, body, foodPositions, obstacles);
+                    foodOfHearts = true;
+                }
+
+                rndResult = rnd.Next(1, 5);
+                if (rndResult == 1 && !foodOfSpades)
+                {
+                    timeSpades = DateTime.Now;
+                    posSpades = Food(headPos, body, foodPositions, obstacles);
+                    foodOfSpades = true;
+                }
+            }
+            if (IsFoodEaten(headPos, posClubs) && foodOfClubs)
+            {
+                foodOfClubs = false;
+                sound.URL = "eat.wav";
+                sound.controls.play();
+                body.Enqueue(pastPos);
+                score += 10;
+            }
+            if (IsFoodEaten(headPos, posHearts) && foodOfHearts)
+            {
+                foodOfHearts = false;
+                sound.URL = "eat.wav";
+                sound.controls.play();
+                body.Enqueue(pastPos);
+                score += 15;
+            }
+            if (IsFoodEaten(headPos, posSpades) && foodOfSpades)
+            {
+                foodOfSpades = false;
+                sound.URL = "eat.wav";
+                sound.controls.play();
+                body.Enqueue(pastPos);
+                score += 20;
             }
 
             screen = InitializeScreen(foodPosition);
@@ -239,20 +197,83 @@ class Snake
             body.Enqueue(pastPos);
             body.Dequeue();
 
+            foreach (var obstacle in obstacles)
+            {
+                screen[obstacle.row, obstacle.col] = obstacleChar;
+            }
             foreach (Position point in body)
             {
                 screen[point.row, point.col] = bodyChar;
             }
             screen[headPos.row, headPos.col] = face;
 
-            Thread.Sleep(150);
+            if (foodOfClubs)
+            {
+                time = DateTime.Now - timeClubs;
+                if (time.Seconds >= 10)
+                {
+                    foodOfClubs = false;
+                }
+                else
+                {
+                    screen[posClubs.row, posClubs.col] = "♣";
+                }   
+            }
+            if (foodOfHearts)
+            {
+                time = DateTime.Now - timeHearts;
+                if (time.Seconds >= 8)
+                {
+                    foodOfHearts = false;
+                }
+                else
+                {
+                    screen[posHearts.row, posHearts.col] = "♥";
+                } 
+            }
+            if (foodOfSpades)
+            {
+                time = DateTime.Now - timeSpades;
+                if (time.Seconds >= 6)
+                {
+                    foodOfSpades = false;
+                }
+                else
+                {
+                    screen[posSpades.row, posSpades.col] = "♠";
+                } 
+            }
+
+            screen[scorePos.row, scorePos.col] = String.Format(placeHolder, score);
+
+            time = DateTime.Now - startTime;
+            screen[timePos.row, timePos.col] = String.Format(placeHolder, (String.Format(timeHolder, time.Hours, time.Minutes, time.Seconds)));
+
+            if (time >= loop)
+            {
+                if (time.Seconds % loop.Seconds == 0)
+                {
+                    music.controls.stop();
+                    music.controls.play();
+                }
+            }
+
+            screen[5, valuesCol] = name;
+            screen[8, valuesCol] = speed;
+            screen[11, valuesCol] = level;
+
+            Thread.Sleep(speedTime);
             Console.Clear();
             printScreen(screen);
 
+            hitObstacle = obstacles.Contains(headPos);
             eatSelf = body.Contains(headPos);
             hitWall = headPos.row > 23 || headPos.row < 1 || headPos.col > 68 || headPos.col < 1;
-            if (hitWall || eatSelf)
+            if (hitWall || eatSelf || hitObstacle)
             {
+                sound.URL = "dead.wav";
+                sound.controls.play();
+                Thread.Sleep(1000);
                 break;
             }
 
@@ -267,6 +288,9 @@ class Snake
             //}
         }
 
+        music.controls.stop();
+        var result = new Dictionary<string, int>();
+        result.Add(name, score);
         return new Dictionary<string, int>();
     }
 
@@ -562,31 +586,52 @@ class Snake
     }
 
     //-----------Food
-    public static Position Food()
+    public static Position Food(Position headPos, Queue<Position> body, List<Position> food, List<Position>obstacles)
     {
-        //Random rnd = new Random();
-        List<int> randomNumbersRow = new List<int>();
-        List<int> randomNumbersCol = new List<int>();
-        int row = 1;
-        int col = 1;
-
-        lock (syncLock)
+        List<Position> board = new List<Position>();
+        for (int row = 1; row <= 23; row++)
         {
-            do
+            for (int col = 1; col <= 68; col++)
             {
-                row = rnd.Next(1, 24);
+                board.Add(new Position(row, col));
             }
-            while (randomNumbersRow.Contains(row));
-
-            do
-            {
-                col = rnd.Next(1, 64);
-            }
-            while (randomNumbersCol.Contains(col));
-
-            Position obstacle = new Position(row, col);
-            return obstacle;
         }
+
+        //var a = board.RemoveAll(x => body.Contains(x) || x.Equals(headPos));
+
+        board.Remove(headPos);
+        foreach (var pos in body)
+        {
+            board.Remove(pos);
+        }
+        foreach (var pos in food)
+        {
+            board.Remove(pos);
+        }
+        foreach (var pos in obstacles)
+        {
+            board.Remove(pos);
+        }
+        //Random rnd = new Random();
+        //int row = 1;
+        //int col = 1;
+        //Position result = new Position();
+
+        return board[rnd.Next(0, board.Count)];
+
+        //lock (syncLock)
+        //{
+        //    do
+        //    {
+
+        //        result.row = rnd.Next(1, 23);
+        //        result.col = rnd.Next(1, 68);
+        //    }
+        //    while (result.Equals(headPos) && body.Contains(result));
+
+        //    //Position food = new Position(row, col);
+        //    return result;
+        //}
         //Position obstacle = new Position(10, 10);
     }
 
@@ -602,7 +647,332 @@ class Snake
         return isEaten;
     }
 
-    #region BombMethod
+    //-----------Obstacles
+    static List<Position> GenerateObstacles(string level = "Medium")
+    {
+        #region MediumShapes
+        bool[,] mShapeOne = {{true, true, true, true, true, true }};
+        bool[,] mShapeTwo = {   {true},
+                                {true},
+                                {true},
+                                {true},
+                                {true},
+                                {true}
+                            };
+        bool[,] mShapeThree = {
+                                {true, true, true},
+                                {true, true, true},
+                                {true, true, true}
+                            };
+        #endregion
+        #region HardShapes
+        bool[,] hShapeOne = {
+                                {true, true, true, true, true, true},
+                                {true, true, true, true, true, true},
+                                {true, true, true, true, true, true},
+                            };
+        bool[,] hShapeTwo = {
+                                {true, false, false, false, false, false},
+                                {true, false, false, false, false, false},
+                                {true, false, false, false, false, false},
+                                {true, false, false, false, false, false},
+                                {true, false, false, false, false, false},
+                                {true, true,  true,  true,  true,  true}
+                            };
+
+        bool[,] hShapeThree = {
+                                {false, false, false, false, false, true},
+                                {false, false, false, false, false, true},
+                                {false, false, false, false, false, true},
+                                {false, false, false, false, false, true},
+                                {false, false, false, false, false, true},
+                                {true,  true,  true,  true,  true,  true}
+                            };
+
+        bool[,] hShapeFour = {
+                                {true, true, true, true, true, true, true},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false}
+                            };
+
+        bool[,] hShapeFive = {
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {true, true, true, true, true, true, true},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false},
+                                {false, false, false, true, false, false, false}
+                            };
+        #endregion
+
+        int choose = 0;
+        var result = new List<Position>();
+        List<Position> positions = new List<Position>();
+        if (level == "Medium")
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                choose = rnd.Next(1, 4);
+                if (choose == 1)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 23; row++)
+                    {
+                        for (int col = 2; col <= 63; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, mShapeOne, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+                           
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < mShapeOne.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < mShapeOne.GetLength(1); col++)
+                        {
+                            if (mShapeOne[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }           
+                        }
+                    }
+
+                }
+                else if (choose == 2)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 18; row++)
+                    {
+                        for (int col = 2; col <= 68; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, mShapeTwo, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < mShapeTwo.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < mShapeTwo.GetLength(1); col++)
+                        {
+                            if (mShapeTwo[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+                else if (choose == 3)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 21; row++)
+                    {
+                        for (int col = 2; col <= 66; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, mShapeThree, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < mShapeThree.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < mShapeThree.GetLength(1); col++)
+                        {
+                            if (mShapeThree[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+            }
+           
+        }
+        else if (level == "Hard")
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                choose = rnd.Next(1, 6);
+                if (choose == 1)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 21; row++)
+                    {
+                        for (int col = 2; col <= 63; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, hShapeOne, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < hShapeOne.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < hShapeOne.GetLength(1); col++)
+                        {
+                            if (hShapeOne[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+                else if (choose == 2)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 18; row++)
+                    {
+                        for (int col = 2; col <= 63; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, hShapeTwo, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < hShapeTwo.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < hShapeTwo.GetLength(1); col++)
+                        {
+                            if (hShapeTwo[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+                else if (choose == 3)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 18; row++)
+                    {
+                        for (int col = 2; col <= 63; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, hShapeThree, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < hShapeThree.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < hShapeThree.GetLength(1); col++)
+                        {
+                            if (hShapeThree[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+                else if (choose == 4)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 17; row++)
+                    {
+                        for (int col = 2; col <= 62; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, hShapeFour, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < hShapeFour.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < hShapeFour.GetLength(1); col++)
+                        {
+                            if (hShapeFour[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+                else if (choose == 5)
+                {
+                    positions.Clear();
+                    for (int row = 1; row <= 17; row++)
+                    {
+                        for (int col = 2; col <= 62; col++)
+                        {
+                            if (IsPositionAvaliable(row, col, hShapeFive, result))
+                            {
+                                positions.Add(new Position(row, col));
+                            }
+
+                        }
+                    }
+
+                    choose = rnd.Next(0, positions.Count);
+
+                    for (int row = 0; row < hShapeFive.GetLength(0); row++)
+                    {
+                        for (int col = 0; col < hShapeFive.GetLength(1); col++)
+                        {
+                            if (hShapeFive[row, col] == true)
+                            {
+                                result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+    static bool IsPositionAvaliable(int row, int col, bool[,] shape, List<Position>unavaliables)
+    {
+        for (int rowAdd = 0; rowAdd < shape.GetLength(0); rowAdd++)
+        {
+            for (int colAdd = 0; colAdd < shape.GetLength(1); colAdd++)
+            {
+                if (shape[rowAdd, colAdd] == true)
+                {
+                    if (unavaliables.Contains(new Position(row + rowAdd, col + colAdd)))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     //public static bool bombEat(Position nextPosition, Dictionary<int, List<int>> bombPositions)
     //{
     //    bool isBombEat = false;
@@ -613,9 +983,8 @@ class Snake
 
     //    return isBombEat;
     //}
-    #endregion
     //---------------Menus
-    static void PrintMainMenu() 
+    static void PrintMenu(string menuSelect) 
     {
         string basilisk =
        @"▀█████████▄     ▄████████    ▄████████  ▄█   ▄█        ▄█     ▄████████    ▄█   ▄█▄ 
@@ -629,16 +998,60 @@ class Snake
                                             ▀                             ▀         ";
         StringBuilder menu = new StringBuilder(basilisk);
         string whiteSpace = new string(' ', 34);
-
         menu.Append(new string('\n', 4));
-        menu.Append(whiteSpace);
-        menu.Append("1. Play New Game\n");
-        menu.Append(whiteSpace);
-        menu.Append("2. High Scores\n");
-        menu.Append(whiteSpace);
-        menu.Append("3. Mute Music\n");
-        menu.Append(whiteSpace);
-        menu.Append("4. Exit\n");
+
+        if (menuSelect == "Main")
+        {
+            menu.Append(whiteSpace);
+            menu.Append("1. Play New Game\n");
+            menu.Append(whiteSpace);
+            menu.Append("2. High Scores\n");
+            menu.Append(whiteSpace);
+            menu.Append("3. Mute Music\n");
+            menu.Append(whiteSpace);
+            menu.Append("4. Exit\n");
+        }
+        else if (menuSelect == "NameSelect")
+        {
+            menu.Append(new string(' ', 28));
+            menu.Append("Input name: ");
+        }
+        else if (menuSelect == "LevelSelect")
+        {
+            menu.Append(whiteSpace);
+            menu.Append("Level:\n");
+            menu.Append(whiteSpace);
+            menu.Append("1. Easy\n");
+            menu.Append(whiteSpace);
+            menu.Append("2. Medium\n");
+            menu.Append(whiteSpace);
+            menu.Append("3. Hard\n");
+        }
+        else if (menuSelect == "SpeedSelect")
+        {
+            menu.Append(whiteSpace);
+            menu.Append("Speed:\n");
+            menu.Append(whiteSpace);
+            menu.Append("1. Slow\n");
+            menu.Append(whiteSpace);
+            menu.Append("2. Medium\n");
+            menu.Append(whiteSpace);
+            menu.Append("3. Fast\n");
+        }
+        else if (menuSelect == "HighScores")
+        {
+            Dictionary<string, int> scores = GetHighScores();
+            int count = 1;
+
+            foreach (var score in scores)
+            {
+                menu.Append(new string(' ', 28));
+                menu.Append(String.Format("{0}. {1}: {2}\n", count, score.Key, score.Value));
+                count++;
+            }
+            menu.Append(new string(' ', 28));
+            menu.Append("Escape: Go Back\n");
+        }
 
         Console.ForegroundColor = ConsoleColor.DarkRed;
         Console.Write(menu);
@@ -646,7 +1059,8 @@ class Snake
     }
     private static int MainMenu()
     {
-        PrintMainMenu();
+        Console.Clear();
+        PrintMenu("Main");
 
         while (true)
         {
@@ -675,7 +1089,98 @@ class Snake
             else
             {
                 Console.Clear();
-                PrintMainMenu();
+                PrintMenu("Main");
+            }
+        }
+    }
+    private static string InputName()
+    {
+        Console.Clear();
+        PrintMenu("NameSelect");
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        string name = Console.ReadLine();
+        Console.ForegroundColor = ConsoleColor.Gray;
+        return name;
+    }
+    private static string LevelSelect()
+    {
+        Console.Clear();
+        PrintMenu("LevelSelect");
+
+        while (true)
+        {
+            userInput = Console.ReadKey();
+
+            if (userInput.Key == ConsoleKey.D1)
+            {
+                Console.Clear();
+                return "Easy";
+            }
+            else if (userInput.Key == ConsoleKey.D2)
+            {
+                Console.Clear();
+                return "Medium";
+            }
+            else if (userInput.Key == ConsoleKey.D3)
+            {
+                Console.Clear();
+                return "Hard";
+            }
+            else
+            {
+                Console.Clear();
+                PrintMenu("LevelSelect");
+            }
+        }
+    }
+    private static string SpeedSelect()
+    {
+        Console.Clear();
+        PrintMenu("SpeedSelect");
+
+        while (true)
+        {
+            userInput = Console.ReadKey();
+
+            if (userInput.Key == ConsoleKey.D1)
+            {
+                Console.Clear();
+                return "Slow";
+            }
+            else if (userInput.Key == ConsoleKey.D2)
+            {
+                Console.Clear();
+                return "Medium";
+            }
+            else if (userInput.Key == ConsoleKey.D3)
+            {
+                Console.Clear();
+                return "Fast";
+            }
+            else
+            {
+                Console.Clear();
+                PrintMenu("SpeedSelect");
+            }
+        }
+    }
+    private static void HighScores()
+    {
+        Console.Clear();
+        PrintMenu("HighScores");
+
+        while (true)
+        {
+            userInput = Console.ReadKey();
+
+            if (userInput.Key == ConsoleKey.Escape)
+            {
+                return;
+            }                     
+            else
+            {
+                Console.Clear();
+                PrintMenu("HighScores");
             }
         }
     }
