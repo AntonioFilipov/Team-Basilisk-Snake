@@ -10,7 +10,7 @@ using System.Media;
 using WMPLib;
 
 class Snake
-{   
+{
     //Bogomil 
     #region Position
     public struct Position
@@ -30,29 +30,56 @@ class Snake
         Console.SetWindowSize(85, 26);
         Console.SetBufferSize(85, 26);
         Console.CursorVisible = false;
+        WindowsMediaPlayer menuMusic = new WindowsMediaPlayer();
+        menuMusic.URL = "inMenu.wav";
+        menuMusic.settings.setMode("loop", true);
+        menuMusic.settings.volume = 50;
+        menuMusic.controls.play();
 
-        //Console.Clear();
-        //PrintHighScores();
-        //Thread.Sleep(9999999);
-
-        int result;
+        int result = 0;
+        string name = null;
+        string speed = null;
+        string level = null;  
         while (true)
         {
             result = MainMenu();
             if (result == 1)
             {
                 direction = 3;
-                PlayGame(InputName(), SpeedSelect(), LevelSelect());
+                name = InputName();
+                speed = SpeedSelect();
+                level = LevelSelect();
+                menuMusic.controls.stop();
+                PlayGame(name, speed, level);
+                menuMusic.controls.play();
+                GameOver();
             }
             else if (result == 2)
             {
                 HighScores();
             }
+            else if (result == 3)
+            {
+                menuMusic.settings.mute = !menuMusic.settings.mute;
+            }
+            else if (result == 4)
+            {
+                Manual();
+            }
+            else if (result == 5)
+            {
+                result = AreYouSure();
+                if (result == 1)
+                {
+                    menuMusic.close();
+                    return;
+                }
+            }
         }
     }
 
     //--------------Game
-    static Dictionary<string, int> PlayGame(string name = "Player", string speed = "Medium", string level = "Medium")
+    static void PlayGame(string name = "Player", string speed = "Medium", string level = "Medium")
     {
         //var bomb = new Dictionary<int, List<int>>();
         //bomb.Add(foodPosition.row, new List<int>());
@@ -63,13 +90,15 @@ class Snake
         string face = "☺";//((char)1).ToString();
         string bodyChar = "♦";//((char)4).ToString();
         string obstacleChar = "¤";
-        
-        string[,] screen = InitializeScreen(new  Position(12, 30));
+
+        string[,] screen = InitializeScreen(new Position(12, 30));
         List<Position> obstacles = GenerateObstacles(level);
 
         int score = 0;
         DateTime startTime = DateTime.Now;
-        TimeSpan time = new TimeSpan(); 
+        TimeSpan time = new TimeSpan();
+        DateTime pauseStart = new DateTime();
+        TimeSpan pauseTime = new TimeSpan();
         string placeHolder = "{0, -14}";
         string timeHolder = "{0}:{1}:{2}";
         int valuesCol = screen.GetLength(1) - 2;
@@ -113,12 +142,14 @@ class Snake
         bool foodOfClubs = false;
         bool foodOfHearts = false;
         bool foodOfSpades = false;
-        int rndResult = 0;
+        bool stopGame = false;
+        int result = 0;
 
-        TimeSpan loop = new TimeSpan(0,1,37);
+        music.settings.setMode("loop", true);
+        //TimeSpan loop = new TimeSpan(0,1,37);
         music.URL = "inGame.wav";
-        music.settings.volume = 40;
-        sound.settings.volume = 85;
+        music.settings.volume = 25;
+        sound.settings.volume = 65;
         music.controls.play();
         while (true)
         {
@@ -143,24 +174,24 @@ class Snake
                 body.Enqueue(pastPos);
                 score += 5;
 
-                rndResult = rnd.Next(1, 3);
-                if (rndResult == 1 && !foodOfClubs)
+                result = rnd.Next(1, 3);
+                if (result == 1 && !foodOfClubs)
                 {
                     timeClubs = DateTime.Now;
                     posClubs = Food(headPos, body, foodPositions, obstacles);
                     foodOfClubs = true;
                 }
 
-                rndResult = rnd.Next(1, 4);
-                if (rndResult == 1 && !foodOfHearts)
+                result = rnd.Next(1, 4);
+                if (result == 1 && !foodOfHearts)
                 {
                     timeHearts = DateTime.Now;
                     posHearts = Food(headPos, body, foodPositions, obstacles);
                     foodOfHearts = true;
                 }
 
-                rndResult = rnd.Next(1, 5);
-                if (rndResult == 1 && !foodOfSpades)
+                result = rnd.Next(1, 5);
+                if (result == 1 && !foodOfSpades)
                 {
                     timeSpades = DateTime.Now;
                     posSpades = Food(headPos, body, foodPositions, obstacles);
@@ -189,7 +220,7 @@ class Snake
                 sound.URL = "eat.wav";
                 sound.controls.play();
                 body.Enqueue(pastPos);
-                score += 20;
+                score += 25;
             }
 
             screen = InitializeScreen(foodPosition);
@@ -217,58 +248,109 @@ class Snake
                 else
                 {
                     screen[posClubs.row, posClubs.col] = "♣";
-                }   
+                }
             }
             if (foodOfHearts)
             {
                 time = DateTime.Now - timeHearts;
-                if (time.Seconds >= 8)
+                if (time.Seconds >= 7)
                 {
                     foodOfHearts = false;
                 }
                 else
                 {
                     screen[posHearts.row, posHearts.col] = "♥";
-                } 
+                }
             }
             if (foodOfSpades)
             {
                 time = DateTime.Now - timeSpades;
-                if (time.Seconds >= 6)
+                if (time.Seconds >= 5)
                 {
                     foodOfSpades = false;
                 }
                 else
                 {
                     screen[posSpades.row, posSpades.col] = "♠";
-                } 
+                }
             }
 
             screen[scorePos.row, scorePos.col] = String.Format(placeHolder, score);
 
-            time = DateTime.Now - startTime;
+            time = DateTime.Now - startTime - pauseTime;
             screen[timePos.row, timePos.col] = String.Format(placeHolder, (String.Format(timeHolder, time.Hours, time.Minutes, time.Seconds)));
-
-            if (time >= loop)
-            {
-                if (time.Seconds % loop.Seconds == 0)
-                {
-                    music.controls.stop();
-                    music.controls.play();
-                }
-            }
 
             screen[5, valuesCol] = name;
             screen[8, valuesCol] = speed;
             screen[11, valuesCol] = level;
 
             Thread.Sleep(speedTime);
-            Console.Clear();
+
+            if (Console.KeyAvailable)
+            {
+                pauseStart = DateTime.Now;
+                userInput = CorrectKey();
+
+                if (userInput.Key == ConsoleKey.D1)
+                {
+                    music.controls.pause();
+                    printScreen(screen);
+                    while (true)
+                    {
+                        if (Console.KeyAvailable)
+                        {
+                            if (Console.ReadKey().Key == ConsoleKey.D1)
+                            {
+                                music.controls.play();
+                                printScreen(screen);
+                                break;
+                            }
+                            else
+                            {
+                                printScreen(screen);
+                            }
+                        }
+                    }
+                }
+                else if (userInput.Key == ConsoleKey.D2)
+                {
+                    music.settings.mute = !music.settings.mute;
+                }
+                else if (userInput.Key == ConsoleKey.D3)
+                {
+                    sound.settings.mute = !sound.settings.mute;
+                }
+                else if (userInput.Key == ConsoleKey.D4)
+                {
+                    music.controls.pause();
+                    result = AreYouSure();
+
+                    if (result == 1)
+                    {
+                        stopGame = true;
+                    }
+                    else if (result == 2)
+                    {
+                        music.controls.play();
+                        printScreen(screen);
+                    }
+                }
+
+                pauseTime += DateTime.Now - pauseStart;
+            }
+            pastPos = headPos;
+            headPos = DirectionOfMovement(headPos);
+
+            if (stopGame)
+            {
+                break;
+            }
+
             printScreen(screen);
 
-            hitObstacle = obstacles.Contains(headPos);
-            eatSelf = body.Contains(headPos);
-            hitWall = headPos.row > 23 || headPos.row < 1 || headPos.col > 68 || headPos.col < 1;
+            hitObstacle = obstacles.Contains(pastPos);
+            eatSelf = body.Contains(pastPos);
+            hitWall = pastPos.row > 23 || pastPos.row < 1 || pastPos.col > 68 || pastPos.col < 1;
             if (hitWall || eatSelf || hitObstacle)
             {
                 sound.URL = "dead.wav";
@@ -278,8 +360,7 @@ class Snake
             }
 
             //Thread.Sleep(99999);
-            pastPos = headPos;
-            headPos = DirectionOfMovement(headPos);
+
 
             //bool isBombEat = bombEat(next, bomb);
             //if (isBombEat)
@@ -288,10 +369,33 @@ class Snake
             //}
         }
 
-        music.controls.stop();
-        var result = new Dictionary<string, int>();
-        result.Add(name, score);
-        return new Dictionary<string, int>();
+        music.close();
+        //var endGameResult = new Dictionary<string, int>();
+        level = level.TrimEnd();
+        speed = speed.TrimEnd();
+        name = name.TrimEnd();
+        if (level == "Medium")
+        {
+            score = (int)(score * 1.5);
+        }
+        else if (level == "Hard")
+        {
+            score = score * 2;
+        }
+
+        if (speed == "Medium")
+        {
+            score = (int)(score * 1.5);
+        }
+        else if (speed == "Fast")
+        {
+            score = score * 2;
+        }
+        //endGameResult.Add(name, score);
+        //return new Dictionary<string, int>();
+        AddCurrentUserScore(name, score);
+        Console.In.Dispose();
+        return;
     }
 
     //Bogomil
@@ -307,7 +411,7 @@ class Snake
         int left = 1;
         int down = 2;
         int up = 3;
-       
+
         Position[] directions = new Position[]
         {
                 new Position(0, 1), //right
@@ -317,38 +421,36 @@ class Snake
         };
         //int direction = rigth; //0 = right; 1 = left; 2 = down; 3 = up;
 
-        if (Console.KeyAvailable)
-        {
-            //Въведената от потребителя посока
-            userInput = CorrectKey();// Console.ReadKey();
 
-            if (userInput.Key == ConsoleKey.RightArrow)
+        //Въведената от потребителя посока
+        //userInput = CorrectKey();// Console.ReadKey();
+
+        if (userInput.Key == ConsoleKey.RightArrow)
+        {
+            if (direction != left)
             {
-                if (direction != left)
-                {
-                    direction = rigth;
-                }
+                direction = rigth;
             }
-            else if (userInput.Key == ConsoleKey.LeftArrow)
+        }
+        else if (userInput.Key == ConsoleKey.LeftArrow)
+        {
+            if (direction != rigth)
             {
-                if (direction != rigth)
-                {
-                    direction = left;
-                }
+                direction = left;
             }
-            else if (userInput.Key == ConsoleKey.DownArrow)
+        }
+        else if (userInput.Key == ConsoleKey.DownArrow)
+        {
+            if (direction != up)
             {
-                if (direction != up)
-                {
-                    direction = down;
-                }
+                direction = down;
             }
-            else if (userInput.Key == ConsoleKey.UpArrow)
+        }
+        else if (userInput.Key == ConsoleKey.UpArrow)
+        {
+            if (direction != down)
             {
-                if (direction != down)
-                {
-                    direction = up;
-                }
+                direction = up;
             }
         }
 
@@ -368,10 +470,12 @@ class Snake
         while (true)
         {
             if (Console.KeyAvailable)
-            { 
+            {
                 correctKey = Console.ReadKey();
                 if (correctKey.Key == ConsoleKey.LeftArrow || correctKey.Key == ConsoleKey.RightArrow ||
-                correctKey.Key == ConsoleKey.UpArrow || correctKey.Key == ConsoleKey.DownArrow)
+                    correctKey.Key == ConsoleKey.UpArrow || correctKey.Key == ConsoleKey.DownArrow ||
+                    correctKey.Key == ConsoleKey.D1 || correctKey.Key == ConsoleKey.D2 ||
+                    correctKey.Key == ConsoleKey.D3 || correctKey.Key == ConsoleKey.D4)
                 {
                     return correctKey;
                 }
@@ -379,8 +483,8 @@ class Snake
             else
             {
                 return userInput;
-            }       
-        }    
+            }
+        }
     }
 
     //--------------Screen
@@ -444,23 +548,19 @@ class Snake
                     }
                     else if (row == 17)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "1: Pause Game");
+                        screen[row, col] = String.Format("{0, -14}", "1:Start/Pause");
                     }
                     else if (row == 18)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "2: Start Game");
+                        screen[row, col] = String.Format("{0, -14}", "2:Music On/Off");
                     }
                     else if (row == 19)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "3: Mute Music");
+                        screen[row, col] = String.Format("{0, -14}", "3:Sound On/Off");
                     }
                     else if (row == 20)
                     {
-                        screen[row, col] = String.Format("{0, -14}", "4: Mute Sounds");
-                    }
-                    else if (row == 21)
-                    {
-                        screen[row, col] = String.Format("{0, -14}", "5: Exit Game");
+                        screen[row, col] = String.Format("{0, -14}", "4:Quit");
                     }
                     else if (row == totalRows - 1)
                     {
@@ -509,16 +609,16 @@ class Snake
             }
             // result.Append('\n');
         }
-
+        Console.Clear();
         Console.Write(result);
     }
-   
+
     //-------------High Scores
     public static Dictionary<string, int> GetHighScores()
     {
-        string line = "";
-        string path = "..\\..\\HighScores.txt";
-        char[] delimiter = new char[] { ',', ' ', ':', '!' };
+        string line = null;
+        string path = "HighScores.txt";
+        char[] delimiter = new char[] { '-'/*',', ' ', ':', '!'*/ };
         var output = new Dictionary<string, int>();
         if (File.Exists(path))
         {
@@ -533,60 +633,72 @@ class Snake
         }
         else
         {
-            SaveHighScore(output);
+            SaveHighScores(output);
         }
 
         return output;
     }
 
-    private static void AddCurrentUserScore(string input, int score)
+    private static void AddCurrentUserScore(string userName, int score)
     {
-        string userName = input.Trim();
-
         var highScores = GetHighScores();
 
         if (highScores.ContainsKey(userName))
         {
-            highScores[userName] = score;
+            if (highScores[userName] < score)
+            {
+                highScores[userName] = score;
+            }
         }
         else
         {
             highScores.Add(userName, score);
         }
 
-        SaveHighScore(highScores);
+        var result = new Dictionary<string, int>();
+        foreach (var scr in highScores.OrderByDescending(i => i.Value))
+        {
+            result.Add(scr.Key, scr.Value);
+        }
+
+        if (highScores.Count > 5)
+        {
+            int smallestValue = int.MaxValue;
+            string smallestValueKey = null;
+
+            foreach (var scr in result)
+            {
+                if (scr.Value < smallestValue)
+                {
+                    smallestValue = scr.Value;
+                    smallestValueKey = scr.Key;
+                }
+            }
+
+            result.Remove(smallestValueKey);
+        }
+
+        SaveHighScores(result);
     }
 
-    private static void SaveHighScore(Dictionary<string, int> currentScores)
+    private static void SaveHighScores(Dictionary<string, int> currentScores)
     {
-        using (StreamWriter sw = new StreamWriter("..\\..\\HighScores.txt"))
+        StringBuilder builder = new StringBuilder();
+        using (StreamWriter sw = new StreamWriter("HighScores.txt"))
         {
             foreach (var item in currentScores)
             {
-                sw.WriteLine(item.Key + ", " + item.Value);
+                builder.Append(item.Key);
+                builder.Append('-');
+                builder.Append(item.Value);
+                sw.WriteLine(builder.ToString());
+                builder.Clear();
             }
         }
     }
 
-    public static void PrintHighScores()
-    {
-        Console.WriteLine(new String('-', 15) + "Highscores" + new String('-', 15));
-        Console.WriteLine();
-        var items = from pair in GetHighScores()
-                    orderby pair.Value descending
-                    select pair;
-        int counter = 0;
-        foreach (var pair in items)
-        {
-            Console.WriteLine("\t{0} : {1,-8} {2,8}", ++counter, pair.Key, pair.Value);
-        }
-
-        Console.WriteLine();
-        Console.WriteLine(new String('-', 40));
-    }
-
     //-----------Food
-    public static Position Food(Position headPos, Queue<Position> body, List<Position> food, List<Position>obstacles)
+    public static Position Food(Position headPos, Queue<Position> body, List<Position> food, List<Position> obstacles)
     {
         List<Position> board = new List<Position>();
         for (int row = 1; row <= 23; row++)
@@ -651,7 +763,7 @@ class Snake
     static List<Position> GenerateObstacles(string level = "Medium")
     {
         #region MediumShapes
-        bool[,] mShapeOne = {{true, true, true, true, true, true }};
+        bool[,] mShapeOne = { { true, true, true, true, true, true } };
         bool[,] mShapeTwo = {   {true},
                                 {true},
                                 {true},
@@ -729,7 +841,7 @@ class Snake
                             {
                                 positions.Add(new Position(row, col));
                             }
-                           
+
                         }
                     }
 
@@ -742,7 +854,7 @@ class Snake
                             if (mShapeOne[row, col] == true)
                             {
                                 result.Add(new Position(positions[choose].row + row, positions[choose].col + col));
-                            }           
+                            }
                         }
                     }
 
@@ -802,11 +914,11 @@ class Snake
                     }
                 }
             }
-           
+
         }
         else if (level == "Hard")
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 4; i++)
             {
                 choose = rnd.Next(1, 6);
                 if (choose == 1)
@@ -954,7 +1066,7 @@ class Snake
 
         return result;
     }
-    static bool IsPositionAvaliable(int row, int col, bool[,] shape, List<Position>unavaliables)
+    static bool IsPositionAvaliable(int row, int col, bool[,] shape, List<Position> unavaliables)
     {
         for (int rowAdd = 0; rowAdd < shape.GetLength(0); rowAdd++)
         {
@@ -972,7 +1084,7 @@ class Snake
 
         return true;
     }
-
+    #region bombs
     //public static bool bombEat(Position nextPosition, Dictionary<int, List<int>> bombPositions)
     //{
     //    bool isBombEat = false;
@@ -983,8 +1095,9 @@ class Snake
 
     //    return isBombEat;
     //}
+    #endregion
     //---------------Menus
-    static void PrintMenu(string menuSelect) 
+    static void PrintMenu(string menuSelect)
     {
         string basilisk =
        @"▀█████████▄     ▄████████    ▄████████  ▄█   ▄█        ▄█     ▄████████    ▄█   ▄█▄ 
@@ -1007,9 +1120,11 @@ class Snake
             menu.Append(whiteSpace);
             menu.Append("2. High Scores\n");
             menu.Append(whiteSpace);
-            menu.Append("3. Mute Music\n");
+            menu.Append("3. Music On/Off\n");
             menu.Append(whiteSpace);
-            menu.Append("4. Exit\n");
+            menu.Append("4. Manual\n");
+            menu.Append(whiteSpace);
+            menu.Append("5. Exit\n");
         }
         else if (menuSelect == "NameSelect")
         {
@@ -1040,17 +1155,83 @@ class Snake
         }
         else if (menuSelect == "HighScores")
         {
+            whiteSpace = new string(' ', 30);
             Dictionary<string, int> scores = GetHighScores();
             int count = 1;
 
             foreach (var score in scores)
             {
-                menu.Append(new string(' ', 28));
+                menu.Append(whiteSpace);
                 menu.Append(String.Format("{0}. {1}: {2}\n", count, score.Key, score.Value));
                 count++;
             }
-            menu.Append(new string(' ', 28));
+            menu.Append(whiteSpace);
             menu.Append("Escape: Go Back\n");
+        }
+        else if (menuSelect == "Manual")
+        {
+            whiteSpace = new string(' ', 24);
+            menu.Append(whiteSpace);
+            menu.Append("The Basilisk: ☺♦♦♦♦\n");
+            menu.Append(whiteSpace);
+            menu.Append("Normal food: ■ (5 points)\n");
+            menu.Append(whiteSpace);
+            menu.Append("Food of Clubs: ♣ (10 points, 10 seconds)\n");
+            menu.Append(whiteSpace);
+            menu.Append("Food of Hearts: ♥(15 points, 7 seconds)\n");
+            menu.Append(whiteSpace);
+            menu.Append("Food of Spades: ♠(25 points, 5 seconds)\n");
+            menu.Append(whiteSpace);
+            menu.Append("Obstacles: ¤\n");
+            menu.Append(whiteSpace);
+            menu.Append("Difficulty: Easy - No obstacles, 1.0 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Difficulty: Medium - Small obstacles, 1.5 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Difficulty: Hard - Big obstacles, 2.0 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Speed: Slow - 1.0 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Speed: Medium - 1.5 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Speed: Fast - 2.0 x Score\n");
+            menu.Append(whiteSpace);
+            menu.Append("Escape: Go Back\n");
+        }
+        else if (menuSelect == "AreYouSure")
+        {
+            menu.Append(whiteSpace);
+            menu.Append("Are you sure?\n");
+            menu.Append(whiteSpace);
+            menu.Append("1. Yes\n");
+            menu.Append(whiteSpace);
+            menu.Append("2. No\n");
+        }
+        else if (menuSelect == "GameOver")
+        {
+            string game = @"                  ▄██████▄     ▄████████   ▄▄▄▄███▄▄▄▄      ▄████████ 
+                 ███    ███   ███    ███ ▄██▀▀▀███▀▀▀██▄   ███    ███ 
+                 ███    █▀    ███    ███ ███   ███   ███   ███    █▀  
+                ▄███          ███    ███ ███   ███   ███  ▄███▄▄▄     
+               ▀▀███ ████▄  ▀███████████ ███   ███   ███ ▀▀███▀▀▀     
+                 ███    ███   ███    ███ ███   ███   ███   ███    █▄  
+                 ███    ███   ███    ███ ███   ███   ███   ███    ███ 
+                 ████████▀    ███    █▀   ▀█   ███   █▀    ██████████ 
+                                                                      ";
+            string over = @"                     ▄██████▄   ▄█    █▄     ▄████████    ▄████████ 
+                    ███    ███ ███    ███   ███    ███   ███    ███ 
+                    ███    ███ ███    ███   ███    █▀    ███    ███ 
+                    ███    ███ ███    ███  ▄███▄▄▄      ▄███▄▄▄▄██▀ 
+                    ███    ███ ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   
+                    ███    ███ ███    ███   ███    █▄  ▀███████████ 
+                    ███    ███ ███    ███   ███    ███   ███    ███ 
+                     ▀██████▀   ▀██████▀    ██████████   ███    ███ 
+                                                         ███    ███ ";
+
+            menu.Clear();
+            menu.Append(game);
+            menu.Append("\n\n");
+            menu.Append(over);
         }
 
         Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -1086,6 +1267,11 @@ class Snake
                 Console.Clear();
                 return 4;
             }
+            else if (userInput.Key == ConsoleKey.D5)
+            {
+                Console.Clear();
+                return 5;
+            }
             else
             {
                 Console.Clear();
@@ -1100,6 +1286,18 @@ class Snake
         Console.ForegroundColor = ConsoleColor.DarkRed;
         string name = Console.ReadLine();
         Console.ForegroundColor = ConsoleColor.Gray;
+
+        name = name.Trim();
+        if (name.Length > 14)
+        {
+            name = name.Substring(0, 14);
+        }
+
+        if (String.IsNullOrEmpty(name))
+        {
+            name = "Player";
+        }
+
         return name;
     }
     private static string LevelSelect()
@@ -1176,7 +1374,7 @@ class Snake
             if (userInput.Key == ConsoleKey.Escape)
             {
                 return;
-            }                     
+            }
             else
             {
                 Console.Clear();
@@ -1184,36 +1382,59 @@ class Snake
             }
         }
     }
-    private static void PrintTankYouForPlayingScreen()
+    private static void Manual()
     {
-        Console.WriteLine("Thank you for playing!");
-    }
-    //Not implemented methods
-    private static void StartNewGame()
-    {
-        // TODO: Implement game;
-        Console.WriteLine("Snake game");
-        Console.WriteLine("Game over!");
-        AddCurrentUserScore("Kiro", CalculateResult());
         Console.Clear();
-        PrintHighScores();
+        PrintMenu("Manual");
+
+        while (true)
+        {
+            userInput = Console.ReadKey();
+
+            if (userInput.Key == ConsoleKey.Escape)
+            {
+                return;
+            }
+            else
+            {
+                Console.Clear();
+                PrintMenu("Manual");
+            }
+        }
     }
-    private static string GetUserName()
+    private static int AreYouSure()
     {
-        // TODO: fix bug with empty entry
-        Console.WriteLine("Enter username: ");
-        string userName = Console.ReadLine();
-        var name = userName.Where(ch => char.IsLetter(ch));
-        return name.ToString();
+        Console.Clear();
+        PrintMenu("AreYouSure");
+
+        while (true)
+        {
+            userInput = Console.ReadKey();
+
+            if (userInput.Key == ConsoleKey.D1)
+            {
+                Console.Clear();
+                return 1;
+            }
+            else if (userInput.Key == ConsoleKey.D2)
+            {
+                Console.Clear();
+                return 2;
+            }
+            else
+            {
+                Console.Clear();
+                PrintMenu("AreYouSure");
+            }
+        }
     }
-    private static int CalculateResult()
+    private static void GameOver()
     {
-        // TODO: Implement real logic;
-        Random rand = new Random();
-        return rand.Next(100, 1000);
-    }
-    private static void PauseGame()
-    {
-        throw new NotImplementedException();
+        Console.Clear();
+        PrintMenu("GameOver");
+
+        Thread.Sleep(2000);
+
+        return;
     }
 }
